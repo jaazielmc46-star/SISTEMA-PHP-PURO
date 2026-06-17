@@ -26,9 +26,17 @@ try {
 /**
  * Ejecuta una consulta preparada
  */
-function ejecutarConsulta($pdo, $sql, $parametros = [])
+function ejecutarConsulta(PDO $pdo, string $sql, array $parametros = []): PDOStatement
 {
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($parametros);
-    return $stmt;
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($parametros);
+
+        return $stmt;
+    } catch (PDOException $e) {
+        die(json_encode([
+            'error' => true,
+            'mensaje' => $e->getMessage()
+        ]));
+    }
 }
