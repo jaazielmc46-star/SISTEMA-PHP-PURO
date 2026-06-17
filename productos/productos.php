@@ -30,11 +30,42 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
+
 <body class="p-4">
 
 <h2 class="mb-3">Listado de Productos</h2>
 
-<table id="tablaProductos" class="display" style="width:80%">
+<!-- FORMULARIO DE FILTROS -->
+<div class="card mb-4 p-3">
+    <div class="row">
+        <div class="col-md-3">
+            <label>Producto</label>
+            <input type="text" id="filtroProducto" class="form-control">
+        </div>
+
+        <div class="col-md-3">
+            <label>Cliente</label>
+            <input type="text" id="filtroCliente" class="form-control">
+        </div>
+
+        <div class="col-md-3">
+            <label>Precio mínimo</label>
+            <input type="number" id="filtroPrecioMin" class="form-control">
+        </div>
+
+        <div class="col-md-3">
+            <label>Precio máximo</label>
+            <input type="number" id="filtroPrecioMax" class="form-control">
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button id="btnBuscar" class="btn btn-primary">Buscar</button>
+        <button id="btnLimpiar" class="btn btn-secondary">Limpiar</button>
+    </div>
+</div>
+
+<table id="tablaProductos" class="display" style="width:100%">
     <thead>
         <tr>
             <th>ID</th>
@@ -56,8 +87,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
-      <div class="modal-body" id="contenidoModal">
-      </div>
+      <div class="modal-body" id="contenidoModal"></div>
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -72,9 +102,18 @@
 <script>
 $(document).ready(function () {
 
+    // Inicializar DataTable
     const tabla = $('#tablaProductos').DataTable({
         ajax: {
             url: 'consulta_productos.php',
+            type: 'GET',
+            data: function (d) {
+                // Pasar los filtros al backend
+                d.producto   = $('#filtroProducto').val();
+                d.cliente    = $('#filtroCliente').val();
+                d.precio_min = $('#filtroPrecioMin').val();
+                d.precio_max = $('#filtroPrecioMax').val();
+            },
             dataSrc: 'data'
         },
         columns: [
@@ -87,53 +126,45 @@ $(document).ready(function () {
                 orderable: false,
                 searchable: false,
                 render: function (data, type, row) {
-                    return `
-                        <button class="btn btn-sm btn-primary btn-detalles"
-                                data-id="${row.id}">
-                            Detalles
-                        </button>
-                    `;
+                    return `<button class="btn btn-sm btn-primary btn-detalles" data-id="${row.id}">Detalles</button>`;
                 }
             }
         ],
-        language: {
-            url: '../public/datatable/i18n/es-ES.json'
-        },
         dom: 'Bfrtip',
         buttons: [
-            {
-                extend: 'excelHtml5',
-                text: '📥 Excel',
-                title: 'Listado de Productos'
-            },
-            {
-                extend: 'pdfHtml5',
-                text: '📄 PDF',
-                title: 'Listado de Productos',
-                orientation: 'landscape',
-                pageSize: 'A4'
-            },
-            {
-                extend: 'print',
-                text: '📝 Word',
-                title: 'Listado de Productos'
-            }
+            { extend: 'excelHtml5', text: '📥 Excel', title: 'Listado de Productos' },
+            { extend: 'pdfHtml5', text: '📄 PDF', title: 'Listado de Productos', orientation: 'landscape' },
+            { extend: 'print', text: '📝 Word', title: 'Listado de Productos' }
         ]
     });
 
-    // CLICK EN BOTÓN DETALLES
+    // Botón BUSCAR
+    $('#btnBuscar').on('click', function () {
+        tabla.ajax.reload();
+    });
+
+    // Botón LIMPIAR
+    $('#btnLimpiar').on('click', function () {
+        $('#filtroProducto').val('');
+        $('#filtroCliente').val('');
+        $('#filtroPrecioMin').val('');
+        $('#filtroPrecioMax').val('');
+        tabla.ajax.reload();
+    });
+
+    // Buscar al presionar ENTER en Producto
+    $('#filtroProducto').on('keyup', function (e) {
+        if(e.key === 'Enter') tabla.ajax.reload();
+    });
+
+    // Modal
     $('#tablaProductos').on('click', '.btn-detalles', function () {
         const id = $(this).data('id');
-
         $('#contenidoModal').html(`
-            <p><strong>ID seleccionado:</strong> ${id}</p>
-            <p>Modal listo para cargar información por AJAX.</p>
+            <p><strong>ID:</strong> ${id}</p>
+            <p>Aquí puedes cargar más datos por AJAX.</p>
         `);
-
-        const modal = new bootstrap.Modal(
-            document.getElementById('modalDetalles')
-        );
-        modal.show();
+        new bootstrap.Modal(document.getElementById('modalDetalles')).show();
     });
 
 });
