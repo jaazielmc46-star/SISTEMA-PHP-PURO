@@ -28,15 +28,15 @@ try {
  */
 function ejecutarConsulta(PDO $pdo, string $sql, array $parametros = []): PDOStatement
 {
-    try {
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($parametros);
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($parametros);
+    return $stmt;
+}
 
-        return $stmt;
-    } catch (PDOException $e) {
-        die(json_encode([
-            'error' => true,
-            'mensaje' => $e->getMessage()
-        ]));
-    }
+/**
+ * Obtiene un único registro
+ */
+function obtenerRegistro($pdo, $sql, $parametros = [])
+{
+    return ejecutarConsulta($pdo, $sql, $parametros)->fetch();
 }
