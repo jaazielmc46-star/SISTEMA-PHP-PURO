@@ -22,3 +22,14 @@ try {
     ]);
     exit;
 }
+
+// NUEVA FUNCION
+/**
+ * Ejecuta una consulta preparada
+ */
+function ejecutarConsulta($pdo, $sql, $parametros = [])
+{
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($parametros);
+    return $stmt;
+}
