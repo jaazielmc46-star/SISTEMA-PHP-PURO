@@ -16,9 +16,8 @@ try {
         ]
     );
 } catch (PDOException $e) {
-    echo json_encode([
-        "error" => true,
-        "mensaje" => $e->getMessage()
-    ]);
-    exit;
+    die(json_encode([
+        'error' => true,
+        'mensaje' => 'Error de conexión a la base de datos'
+    ]));
 }
