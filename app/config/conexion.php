@@ -21,3 +21,14 @@ try {
         'mensaje' => 'Error de conexión a la base de datos'
     ]));
 }
+
+// NUEVA FUNCION
+/**
+ * Ejecuta una consulta preparada
+ */
+function ejecutarConsulta($pdo, $sql, $parametros = [])
+{
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($parametros);
+    return $stmt;
+}
